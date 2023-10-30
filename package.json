@@ -1,0 +1,10 @@
+{
+    "scripts": {
+      "format": "npx prettier --write *.css *.html *.js",
+      "serve": "npx srvd --debug"
+    },
+    "author": "City of Chattanooga",
+    "license": "CC0-1.0",
+    "private": true
+  }
+  

@@ -1,0 +1,19 @@
+District,Latitude,Longitude,Location
+1,35.063562,-85.310268,Manufacturers & Cherokee Blvd
+1,35.094368,-85.331318,Signal Mt Road (by Walmart)
+2,35.061791,-85.304515,Frazier Ave & Tremont St
+2,35.104362,-85.273766,"Different result than Chat GPT, preventing dividing cluster on Frazier Ave into pieces"
+3,35.138778,-85.247194,North Point Blvd & Hwy 153
+3,35.152975,-85.24562,Hwy 153 (by Walmart)
+4,35.037485,-85.149705,Near Gunbarrel Road & Commons Blvd (by Best Buy)
+4,35.008124,-85.154777,East Brainerd Road & Jenkins Rd (by Food City)
+5,35.024363,-85.246029,Brainerd Road & South Germantown Road.  On the border of district 5. 
+5,35.011179,-85.223694,Brainerd Road between N Moore Road & Spring Creek Road
+6,35.008709,-85.205213,(by Eastgate Walmart)
+6,35.044954,-85.162495,Lee Highway & Shallowford Road
+7,35.045745,-85.310482,MLK & Broad Street
+7,35.001407,-85.292201,East 37th Street & Rossville Blvd
+8,35.017689,-85.280427,East 23rd & S Kelley St
+8,35.044756,-85.30557,East MLK & Houston St.
+9,35.034783,-85.271919,S. Willow St & McCallie Ave
+9,35.052647,-85.260826,Dodson Ave & Wilcox Blvd
