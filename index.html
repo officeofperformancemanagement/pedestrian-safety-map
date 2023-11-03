@@ -5,18 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Monda"
-    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda" />
 
     <title>Chattanooga Pedestrian Safety Map</title>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
       * {
@@ -63,13 +55,9 @@
     </style>
 
     <!-- Make sure you put this AFTER Leaflet's CSS -->
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-      crossorigin=""
-    ></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <style></style>
+    <script src="./assets/leaflet-heat.js"></script>
   </head>
 
   <body>
@@ -83,15 +71,15 @@
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' +
-          '&nbsp;<a href="https://www.flaticon.com/free-icons/explosion" title="explosion icons">Icons from Freepik - Flaticon</a>',
+          '&nbsp;<a href="https://www.flaticon.com/free-icons/explosion" title="explosion icons">Icons from Freepik - Flaticon</a>'
       }).addTo(map);
 
-      const districts = await fetch("./data/city-council.geojson").then((res) =>
-        res.json(),
-      );
+      const districts = await fetch("./data/city-council.geojson").then(res => res.json());
+
+      const districtFillOpacity = new URLSearchParams(window.location.search).get("district_fill") === "false" ? 0 : 0.7;
 
       L.geoJson(districts, {
-        style: (feat) => {
+        style: feat => {
           const colors = {
             1: "#749dd9",
             2: "#bb8985",
@@ -101,16 +89,16 @@
             6: "#c6df88", // lime green
             7: "#9a82cc", // purple
             8: "#de95e2", // pink
-            9: "#9fd9dc", // light blue
+            9: "#9fd9dc" // light blue
           };
           return {
             color: "white",
             opacity: 0.95,
             fillColor: colors[feat.properties.citydst],
-            fillOpacity: 0.7,
+            fillOpacity: districtFillOpacity,
             weight: 2
           };
-        },
+        }
       }).addTo(map);
 
       const icons = {
@@ -119,17 +107,40 @@
           iconSize: [40, 40], // size of the icon
           shadowSize: [40, 40], // size of the shadow
           iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-          popupAnchor: [0, 0], // point from which the popup should open relative to the iconAnchor
+          popupAnchor: [0, 0] // point from which the popup should open relative to the iconAnchor
         })
       };
 
       const csv_manual = await fetch("./data/pedestrian-safety-clusters.csv").then(res => res.text());
-      const csv_data_manual = csv_manual.trim().split("\n").slice(1).map(row => row.split(",")).forEach(row => {
-        const [dst, lat, lon, location] = row;
-        L.marker([Number(lat), Number(lon)], { icon: icons.hotspot }).addTo(map).bindPopup(`district: ${dst}</br>lat: ${lat}</br>longitude: ${lon}</br>location: ${location}`);
-      });
-    </script>
+      const csv_data_manual = csv_manual
+        .trim()
+        .split("\n")
+        .slice(1)
+        .map(row => row.split(","))
+        .forEach(row => {
+          const [dst, lat, lon, location] = row;
+          L.marker([Number(lat), Number(lon)], { icon: icons.hotspot })
+            .addTo(map)
+            .bindPopup(`district: ${dst}</br>lat: ${lat}</br>longitude: ${lon}</br>location: ${location}`);
+        });
 
-    <!-- <script src="./main.js" type="module"></script> -->
+      if (new URLSearchParams(window.location.search).get("heatmap") === "true") {
+        const url = "https://www.chattadata.org/resource/nvdi-c4tt.geojson?pedestrian_involved=Yes";
+        const res = await fetch(url);
+        const incidents = await res.json();
+        console.log("geojson:", incidents);
+
+        const heatLayerData = incidents.features.map(function (feat) {
+          const coords = feat.geometry.coordinates;
+          const involved_fatal_injury = feat.properties.involved_fatal_injury;
+          const intensity = involved_fatal_injury === "Yes" ? 1 : 0.5;
+          return [coords[1], coords[0], intensity];
+        });
+        const heatLayer = L.heatLayer(heatLayerData, {
+          maxZoom: 15,
+          radius: 25
+        }).addTo(map);
+      }
+    </script>
   </body>
 </html>

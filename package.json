@@ -1,6 +1,6 @@
 {
     "scripts": {
-      "format": "npx prettier --write *.css *.html *.js",
+      "format": "npx prettier --arrow-parens=avoid --print-width=200 --trailing-comma=none --write *.css *.html *.js",
       "serve": "npx srvd --debug"
     },
     "author": "City of Chattanooga",
