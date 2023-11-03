@@ -66,6 +66,8 @@
     </div>
 
     <script type="module">
+      const searchParams = new URLSearchParams(window.location.search);
+
       const map = L.map("map").setView([35.045631, -85.309677], 13);
 
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -76,7 +78,7 @@
 
       const districts = await fetch("./data/city-council.geojson").then(res => res.json());
 
-      const districtFillOpacity = new URLSearchParams(window.location.search).get("district_fill") === "false" ? 0 : 0.7;
+      const districtFillOpacity = searchParams.get("district_fill") === "false" ? 0 : 0.7;
 
       L.geoJson(districts, {
         style: feat => {
@@ -124,18 +126,28 @@
             .bindPopup(`district: ${dst}</br>lat: ${lat}</br>longitude: ${lon}</br>location: ${location}`);
         });
 
-      if (new URLSearchParams(window.location.search).get("heatmap") === "true") {
+      if (searchParams.get("heatmap") === "true") {
         const url = "https://www.chattadata.org/resource/nvdi-c4tt.geojson?pedestrian_involved=Yes";
         const res = await fetch(url);
         const incidents = await res.json();
         console.log("geojson:", incidents);
 
-        const heatLayerData = incidents.features.map(function (feat) {
-          const coords = feat.geometry.coordinates;
-          const involved_fatal_injury = feat.properties.involved_fatal_injury;
-          const intensity = involved_fatal_injury === "Yes" ? 1 : 0.5;
-          return [coords[1], coords[0], intensity];
-        });
+        const start_time = searchParams.has("start_year") ? new Date(searchParams.get("start_year") + "-01-01T00:00:00.000") : null;
+        console.log("start_time:", start_time);
+
+        const heatLayerData = incidents.features
+          .filter(function (feat) {
+            if (start_time === null) return true;
+            const properties = feat.properties;
+            const incident_time = new Date(properties.incident_date).getTime();
+            return incident_time > start_time;
+          })
+          .map(function (feat) {
+            const coords = feat.geometry.coordinates;
+            const involved_fatal_injury = feat.properties.involved_fatal_injury;
+            const intensity = involved_fatal_injury === "Yes" ? 1 : 0.5;
+            return [coords[1], coords[0], intensity];
+          });
         const heatLayer = L.heatLayer(heatLayerData, {
           maxZoom: 15,
           radius: 25
