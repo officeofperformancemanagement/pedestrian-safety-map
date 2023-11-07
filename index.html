@@ -126,12 +126,13 @@
             .bindPopup(`district: ${dst}</br>lat: ${lat}</br>longitude: ${lon}</br>location: ${location}`);
         });
 
-      if (searchParams.get("heatmap") === "true") {
-        const url = "https://www.chattadata.org/resource/nvdi-c4tt.geojson?pedestrian_involved=Yes";
-        const res = await fetch(url);
-        const incidents = await res.json();
-        console.log("geojson:", incidents);
 
+      const url = "https://www.chattadata.org/resource/nvdi-c4tt.geojson?pedestrian_involved=Yes";
+      const res = await fetch(url);
+      const incidents = await res.json();
+      console.log("geojson:", incidents);
+
+      if (searchParams.get("heatmap") === "true") {
         const start_time = searchParams.has("start_year") ? new Date(searchParams.get("start_year") + "-01-01T00:00:00.000") : null;
         console.log("start_time:", start_time);
 
@@ -152,6 +153,14 @@
           maxZoom: 15,
           radius: 25
         }).addTo(map);
+      }
+
+      if (searchParams.has("incident_number")) {
+        const incident_number = searchParams.get("incident_number");
+        const incident = incidents.features.find(feat => feat.properties.incident_number === incident_number);
+        const [lon, lat] = incident.geometry.coordinates;
+        L.marker([lat, lon]).addTo(map).bindPopup(JSON.stringify(incident.properties, undefined, 2).replaceAll("\n", "</br>"));
+        map.setView([lat,lon], 12);
       }
     </script>
   </body>
